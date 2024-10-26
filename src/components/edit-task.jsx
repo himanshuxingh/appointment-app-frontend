@@ -5,35 +5,33 @@ import { useNavigate, useParams } from "react-router-dom";
 import * as Yup from "yup";
 
 export function EditTask() {
-    const [appointment, setAppointment] = useState(null); // null to handle loading state
+    const [appointment, setAppointment] = useState(null);
     const { appointmentId } = useParams();
     let navigate = useNavigate();
 
     const validationSchema = Yup.object({
         Title: Yup.string()
-            .required("Tilte is required"),
+            .required("Title is required"),
         Description: Yup.string()
-            .required("Description is reqired"),
+            .required("Description is required"),
         Date: Yup.date()
-            .required("date is required")
-    })
+            .required("Date is required")
+    });
 
-    // Fetch the appointment data
     useEffect(() => {
         axios.get(`${process.env.REACT_APP_API_URL}/appointment/${appointmentId}`)
             .then((response) => {
                 console.log(response.data);
-                setAppointment(response.data); // Set fetched appointment data
+                setAppointment(response.data);
             })
             .catch((error) => {
                 console.error("Error fetching appointment", error);
             });
     }, [appointmentId]);
 
-    // Initialize Formik with dynamic initialValues based on fetched data
     const editFormik = useFormik({
         initialValues: {
-            Title: appointment?.Title || '', // Default to empty string if appointment is null
+            Title: appointment?.Title || '',
             Description: appointment?.Description || '',
             Date: appointment?.Date ? new Date(appointment.Date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
         },
@@ -43,63 +41,67 @@ export function EditTask() {
                 .then((response) => {
                     console.log("Updated successfully", response.data);
                     navigate('/dashboard')
-
                 })
                 .catch((error) => {
                     console.error("Error updating appointment", error);
                 });
         },
-        enableReinitialize: true // This ensures Formik updates when appointment is fetched
+        enableReinitialize: true
     });
 
-    // Show loading indicator while appointment data is being fetched
     if (!appointment) {
-        return <div>Loading...</div>; // or some kind of spinner
+        return <div>Loading...</div>;
     }
 
     return (
-        <div className="d-flex align-items-center justify-content-center vh-100 bg-light">
-            <div className="bg-white p-4 shadow" style={{ width: '30%' }}>
+        <div className="d-flex align-items-center justify-content-center vh-100 bg-light p-3">
+            <div className="bg-white shadow p-3 p-md-4 rounded col-12 col-md-6 col-lg-4">
                 <h3 className="text-center mb-4">Edit Appointment</h3>
                 <form onSubmit={editFormik.handleSubmit}>
                     <div className="mb-3">
-                        <dd>Title</dd>
+                        <dd className="mb-1">Title</dd>
                         <input
                             id="Title"
                             name="Title"
-                            className="form-control"
+                            className="form-control w-100"
                             onChange={editFormik.handleChange}
-                            value={editFormik.values.Title} // Fetched value now reflected here
+                            value={editFormik.values.Title}
                             type="text"
                             onBlur={editFormik.handleBlur}
                         />
-                        {editFormik.touched.Title&&editFormik.errors.Title?(<div className="text-danger">{editFormik.errors.Title}</div>):null}
+                        {editFormik.touched.Title && editFormik.errors.Title ? (
+                            <div className="text-danger">{editFormik.errors.Title}</div>
+                        ) : null}
                     </div>
                     <div className="mb-3">
-                        <dd>Description</dd>
+                        <dd className="mb-1">Description</dd>
                         <textarea
                             id="Description"
                             rows="4"
                             name="Description"
-                            className="form-control"
+                            className="form-control w-100"
                             onChange={editFormik.handleChange}
-                            value={editFormik.values.Description} // Fetched value reflected here
+                            value={editFormik.values.Description}
                             onBlur={editFormik.handleBlur}
                         ></textarea>
-                        {editFormik.touched.Description&&editFormik.errors.Description?(<div className="text-danger">{editFormik.errors.Description}</div>):null}
+                        {editFormik.touched.Description && editFormik.errors.Description ? (
+                            <div className="text-danger">{editFormik.errors.Description}</div>
+                        ) : null}
                     </div>
                     <div className="mb-3">
-                        <dd>Date</dd>
+                        <dd className="mb-1">Date</dd>
                         <input
-                            id="dte"
+                            id="Date"
                             name="Date"
                             type="date"
-                            className="form-control"
+                            className="form-control w-100"
                             onChange={editFormik.handleChange}
-                            value={editFormik.values.Date} // Date properly formatted and reflected
+                            value={editFormik.values.Date}
                             onBlur={editFormik.handleBlur}
                         />
-                        {editFormik.touched.Date&&editFormik.errors.Date?(<div className="text-danger">{editFormik.errors.Date}</div>):null}
+                        {editFormik.touched.Date && editFormik.errors.Date ? (
+                            <div className="text-danger">{editFormik.errors.Date}</div>
+                        ) : null}
                     </div>
                     <button className="btn btn-primary w-100" type="submit">Save</button>
                 </form>
